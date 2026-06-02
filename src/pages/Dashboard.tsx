@@ -1,12 +1,20 @@
+import { Volume2 } from "lucide-react";
 import { useTransactionStore } from "@/stores/transactions";
 import { useSettingsStore } from "@/stores/settings";
-import { formatCurrencyVi, formatDate } from "@/lib/format";
+import { formatCurrencyVi, formatDate, buildTtsText } from "@/lib/format";
+import { enqueueTts } from "@/lib/tts";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function Dashboard() {
   const transactions = useTransactionStore((s) => s.transactions);
   const settings = useSettingsStore((s) => s.settings);
+
+  function handlePlay(tx: (typeof transactions)[number]) {
+    const text = buildTtsText(tx.amountIn, tx.amountOut);
+    enqueueTts(text, settings.ttsVoice || undefined);
+  }
 
   const recent = transactions.slice(0, 10);
   const todayTotal = transactions
@@ -74,17 +82,28 @@ export function Dashboard() {
                       {formatDate(tx.transactionDate)} · {tx.bankBrandName}
                     </p>
                   </div>
-                  <div className="text-right">
-                    {tx.amountIn > 0 && (
-                      <Badge variant="default" className="bg-green-600 text-white">
-                        +{formatCurrencyVi(tx.amountIn)}
-                      </Badge>
-                    )}
-                    {tx.amountOut > 0 && (
-                      <Badge variant="destructive">
-                        -{formatCurrencyVi(tx.amountOut)}
-                      </Badge>
-                    )}
+                  <div className="flex items-center gap-2">
+                    <div className="text-right">
+                      {tx.amountIn > 0 && (
+                        <Badge variant="default" className="bg-green-600 text-white">
+                          +{formatCurrencyVi(tx.amountIn)}
+                        </Badge>
+                      )}
+                      {tx.amountOut > 0 && (
+                        <Badge variant="destructive">
+                          -{formatCurrencyVi(tx.amountOut)}
+                        </Badge>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      onClick={() => handlePlay(tx)}
+                      title="Phát âm thanh"
+                    >
+                      <Volume2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}

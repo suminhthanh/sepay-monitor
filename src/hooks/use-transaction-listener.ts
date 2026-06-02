@@ -64,12 +64,7 @@ export function useTransactionListener() {
 
         // TTS announcement
         if (settings.announcementsEnabled) {
-          const text = buildTtsText(
-            tx.amount_in,
-            tx.amount_out,
-            tx.transaction_content,
-            tx.bank_brand_name
-          );
+          const text = buildTtsText(tx.amount_in, tx.amount_out);
           enqueueTts(text, settings.ttsVoice || undefined);
         }
 

@@ -26,16 +26,10 @@ export function formatTtsAmount(amount: number): string {
 }
 
 /** Build TTS announcement text for a transaction */
-export function buildTtsText(
-  amountIn: number,
-  amountOut: number,
-  content: string,
-  bankName: string
-): string {
+export function buildTtsText(amountIn: number, amountOut: number): string {
   if (amountIn > 0) {
     const amountText = formatTtsAmount(amountIn);
-    const contentPart = content ? `. Nội dung: ${content}` : "";
-    return `SePay báo có ${amountText} từ ${bankName || "ngân hàng"}${contentPart}`;
+    return `SePay báo có ${amountText}`;
   } else {
     const amountText = formatTtsAmount(amountOut);
     return `Đã chuyển ${amountText}`;

@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { Volume2 } from "lucide-react";
 import { useTransactionStore } from "@/stores/transactions";
+import { useSettingsStore } from "@/stores/settings";
 import { getTransactions } from "@/db/queries";
-import { formatCurrencyVi, formatDate } from "@/lib/format";
+import { formatCurrencyVi, formatDate, buildTtsText } from "@/lib/format";
+import { enqueueTts } from "@/lib/tts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -16,7 +19,13 @@ import { exportToExcel } from "@/lib/export";
 
 export function History() {
   const { transactions, setTransactions, setLoading, isLoading } = useTransactionStore();
+  const ttsVoice = useSettingsStore((s) => s.settings.ttsVoice);
   const [exporting, setExporting] = useState(false);
+
+  function handlePlay(tx: (typeof transactions)[number]) {
+    const text = buildTtsText(tx.amountIn, tx.amountOut);
+    enqueueTts(text, ttsVoice || undefined);
+  }
 
   useEffect(() => {
     async function load() {
@@ -74,6 +83,7 @@ export function History() {
                 <TableHead>Nội dung</TableHead>
                 <TableHead className="text-right">Tiền vào</TableHead>
                 <TableHead className="text-right">Tiền ra</TableHead>
+                <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -99,6 +109,17 @@ export function History() {
                         -{formatCurrencyVi(tx.amountOut)}
                       </Badge>
                     )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handlePlay(tx)}
+                      title="Phát âm thanh"
+                    >
+                      <Volume2 className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
